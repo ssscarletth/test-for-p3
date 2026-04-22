@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Blocks p5.js Demo</title>
+    <!-- Add p5.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+</head>
+<body>
+    <script>
+    let img;
+    let stepSize = 50;
+
+    function preload() {
+      // Update the path below to match your image location:
+      // If your image is in the same folder as this HTML file, just use the filename:
+      img = loadImage('coffee.jpg');
+      // If your image is in a subfolder, e.g. 'images/coffee.jpg', use:
+      // img = loadImage('images/coffee.jpg');
+      // If your image is in the parent folder, use:
+      // img = loadImage('../coffee.jpg');
+    }
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      // Do not resize the image, keep its original size
+      noStroke();
+    }
+
+    function draw() {
+      background(0);
+      if (stepSize > 1) {
+        stepSize -= 0.5; // slower flicker
+      } else {
+        stepSize = 1;
+      }
+      // Center the image on the canvas
+      let x0 = (width - img.width) / 2;
+      let y0 = (height - img.height) / 2;
+      if (stepSize <= 1) {
+        image(img, x0, y0);
+      } else {
+        img.loadPixels();
+        for (let y = 0; y < img.height; y += stepSize) {
+          for (let x = 0; x < img.width; x += stepSize) {
+            let c = img.get(x, y);
+            fill(c);
+            rect(x0 + x, y0 + y, stepSize, stepSize);
+          }
+        }
+      }
+    }
+    // Optional: Reset animation on mouse click
+    function mousePressed() {
+      stepSize = 50;
+    }
+    </script>
+</body>
+<script>
+
+function mousePressed() {
+  stepSize = 50;
+}
+
+// Ensures the layout stays responsive if the browser window changes
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  img.resize(width, height);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/zoom-rectangles.css"> 
+</head>
+
+<body>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body { overflow: hidden; }
+        #zoom-frame, #zoom-svg {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+
+    <div id="zoom-frame" style="width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#222;">
+        <svg id="zoom-svg" width="600" height="600" viewBox="0 0 600 600" style="background:#eeeeee;display:block;">
+        </svg>
+    </div>
+
+    <script>
+    // Infinite zoom effect with nested rectangles
+    const svg = document.getElementById('zoom-svg');
+    let zoom = 1;
+    let level = 0;
+    const maxLevel = 10;
+    function drawRectangles(level, zoom) {
+        // Make SVG fill the window
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        svg.setAttribute('width', w);
+        svg.setAttribute('height', h);
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        svg.innerHTML = '';
+        const centerX = w / 2;
+        const centerY = h / 2;
+        let size = Math.max(w, h);
+        const frameColor = 'black';
+        for (let i = 0; i < maxLevel; i++) {
+            let scale = Math.pow(0.5, i) * zoom;
+            let rectSize = size * scale;
+            let offsetX = centerX - rectSize / 2;
+            let offsetY = centerY - rectSize / 2;
+            if (rectSize > 1) {
+                // Door frame: top, left, right sides only
+                let x1 = offsetX, y1 = offsetY;
+                let x2 = offsetX + rectSize, y2 = offsetY;
+                let x3 = offsetX + rectSize, y3 = offsetY + rectSize;
+                let x4 = offsetX, y4 = offsetY + rectSize;
+                let path = `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} M ${x1} ${y1} L ${x4} ${y4}`;
+                svg.innerHTML += `<path d="${path}" fill="none" stroke="${frameColor}" stroke-width="${4 - i * 0.3}" />`;
+            }
+        }
+    }
+    
+    drawRectangles(level, zoom);
+
+    window.addEventListener('resize', () => drawRectangles(level, zoom));
+
+    document.addEventListener('wheel', (e) => {
+        zoom *= e.deltaY > 0 ? 1.05 : 0.95;
+        if (zoom > 2) {
+            zoom = 1;
+            level++;
+        }
+        if (zoom < 0.5) {
+            zoom = 1.5;
+            level = Math.max(0, level - 1);
+        }
+        drawRectangles(level, zoom);
+        e.preventDefault();
+    }, { passive: false });
+    </script>
+</body>
+</html>
