@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body, html { 
+    margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
+    background-color: #9e9e9e; 
+  }
+
+  #viewport { width: 100vw; height: 100vh; cursor: crosshair; overflow: hidden; position: relative; }
+  #map-container { width: 1800px; position: absolute; top: 0; left: 0; line-height: 0; }
+  #map-image { width: 100%; height: auto; -webkit-user-drag: none; user-select: none; display: block; }
+
+  #interaction-svg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+  }
+
+  /* Circular light style with soft glow */
+  .window-light {
+    fill: #ffdb1d; 
+    opacity: 0.8;
+    /* This blur creates the "atmospheric" feel you wanted */
+    filter: blur(2px) drop-shadow(0 0 10px #ffdb1d);
+    pointer-events: all;
+  }
+
+  #tool-panel {
+    position: fixed; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.9); color: #00ff00;
+    padding: 15px; z-index: 1000; width: 350px;
+    font-family: monospace; font-size: 12px; border-radius: 8px;
+  }
+
+  .control-group {
+    margin: 10px 0; padding: 10px; border: 1px solid #444; background: #222;
+  }
+
+  textarea {
+    width: 100%; height: 150px; background: #111; color: #00ff00;
+    border: 1px solid #444; margin-top: 10px; font-size: 11px;
+  }
+
+  button { background: #00ff00; color: black; border: none; padding: 5px 10px; cursor: pointer; font-weight: bold; margin-top: 5px;}
+</style>
+</head>
+<body>
+
+<div id="tool-panel">
+  <strong>Circle Light Tool</strong><br>
+  
+  <div class="control-group">
+    <strong>Select Glow Size (Radius):</strong><br>
+    <input type="radio" name="size" value="4" id="xs"> ExtraSmall (r=4) |
+    <input type="radio" name="size" value="6" id="s"> Small (r=6) |
+    <input type="radio" name="size" value="8" id="m" checked> Medium (r=8) |
+    <input type="radio" name="size" value="11" id="l"> Large (r=11)
+  </div>
+  
+  <p>How to use: Click the center of any window to place a light.</p>
+  <textarea id="code-output" readonly placeholder="Generated code will appear here..."></textarea>
+  <button onclick="clearLast()">Undo Last</button>
+</div>
+
+<div id="viewport">
+  <div id="map-container">
+    <img src="citymap2.png" id="map-image"> 
+    <svg id="interaction-svg" preserveAspectRatio="none"></svg>
+  </div>
+</div>
+
+<script>
+  const viewport = document.querySelector('#viewport');
+  const mapImage = document.querySelector('#map-image');
+  const mapContainer = document.querySelector('#map-container');
+  const svg = document.querySelector('#interaction-svg');
+  const codeOutput = document.querySelector('#code-output');
+
+  let circles = []; 
+
+  function setupSVG() {
+    svg.setAttribute('viewBox', `0 0 ${mapImage.naturalWidth} ${mapImage.naturalHeight}`);
+  }
+  if (mapImage.complete) setupSVG(); else mapImage.onload = setupSVG;
+
+  viewport.addEventListener('click', (e) => {
+    if (isMoved) return;
+
+    // Get selected radius
+    const radius = parseInt(document.querySelector('input[name="size"]:checked').value);
+
+    const rect = mapImage.getBoundingClientRect();
+    const nw = mapImage.naturalWidth;
+    const nh = mapImage.naturalHeight;
+
+    // Calculate center coordinates
+    const cx = Math.round((e.clientX - rect.left) * (nw / rect.width));
+    const cy = Math.round((e.clientY - rect.top) * (nh / rect.height));
+
+    // Draw preview on screen
+    const newCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    newCircle.setAttribute("class", "window-light");
+    newCircle.setAttribute("cx", cx);
+    newCircle.setAttribute("cy", cy);
+    newCircle.setAttribute("r", radius);
+    svg.appendChild(newCircle);
+
+    // Generate the SVG Circle code
+    const codeLine = `<circle class="window-light" cx="${cx}" cy="${cy}" r="${radius}" />`;
+    circles.push({ code: codeLine, element: newCircle });
+    
+    updateOutput();
+  });
+
+  function updateOutput() {
+    codeOutput.value = circles.map(c => c.code).join('\n');
+    codeOutput.scrollTop = codeOutput.scrollHeight;
+  }
+
+  function clearLast() {
+    if (circles.length > 0) {
+      const last = circles.pop();
+      svg.removeChild(last.element);
+      updateOutput();
+    }
+  }
+
+  // Drag logic
+  let isDown = false, isMoved = false, startX, startY, initialLeft, initialTop;
+  viewport.addEventListener('mousedown', (e) => {
+    isDown = true; isMoved = false;
+    startX = e.clientX; startY = e.clientY;
+    initialLeft = mapContainer.offsetLeft; initialTop = mapContainer.offsetTop;
+  });
+  document.addEventListener('mouseup', () => isDown = false);
+  document.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) isMoved = true;
+    mapContainer.style.left = (initialLeft + dx) + 'px';
+    mapContainer.style.top = (initialTop + dy) + 'px';
+  });
+</script>
+
+</body>
+</html>

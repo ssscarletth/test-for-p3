@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body, html {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden; 
+    background-color: #9e9e9e; /* Your grey background */
+  }
+
+  #viewport {
+    width: 100vw; height: 100vh;
+    cursor: grab;
+    overflow: auto;
+    display: block;
+    -ms-overflow-style: none; scrollbar-width: none; /* Hide scrollbars */
+  }
+  #viewport::-webkit-scrollbar { display: none; }
+
+  #map-container {
+    /* We make the container larger than the screen to allow dragging */
+    width: 1800px; 
+    position: relative;
+    line-height: 0;
+    display: block; /* Ensures container takes up space */
+  }
+
+  #map-image {
+    width: 100%;
+    height: auto;
+    -webkit-user-drag: none;
+    user-select: none;
+    display: block; /* Important: removes tiny gaps at bottom */
+  }
+
+  /* SVG layer perfectly matches the image */
+  #interaction-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10; /* This forces it to the front */
+  }
+
+/* THE WINDOW LIGHTS */
+  .window-light {
+    fill: #ffdb1d; /* Yellow */
+    opacity: 0;    /* Hidden by default */
+    pointer-events: all; /* Important: makes it clickable/hoverable */
+    cursor: pointer;
+    filter: blur(2px) drop-shadow(0 0 10px #ffdb1d);
+    transition: opacity 0.4s ease;
+  } 
+
+  .window-light:hover:not(.lit) {
+    opacity: 0.3; /* Subtle glow on hover */
+  }
+
+
+   /* THE "LIT" STATE (Added by JavaScript) */
+  .window-light.lit {
+    opacity: 0.8 !important;
+    filter: blur(2px) drop-shadow(0 0 10px #ffdb1d);
+  }
+
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="map-container">
+    
+    <img src="citymap2.png" id="map-image">
+
+    <!-- ViewBox matches your original 1536x1024 image -->
+    <svg id="interaction-svg" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    
+    <!-- WINDOWS YOU RECORDED -->
+    <circle class="window-light" cx="397" cy="719" r="4" />
+    <circle class="window-light" cx="409" cy="725" r="4" />
+    <circle class="window-light" cx="628" cy="356" r="4" />
+    <circle class="window-light" cx="613" cy="365" r="4" />
+    <circle class="window-light" cx="734" cy="397" r="4" />
+    <circle class="window-light" cx="1039" cy="405" r="4" />
+    <circle class="window-light" cx="1028" cy="410" r="4" />
+    <circle class="window-light" cx="1090" cy="352" r="4" />
+    <circle class="window-light" cx="1072" cy="340" r="4" />
+    <circle class="window-light" cx="1274" cy="507" r="4" />
+    <circle class="window-light" cx="1276" cy="526" r="4" />
+    <circle class="window-light" cx="1361" cy="646" r="4" />
+    <circle class="window-light" cx="1298" cy="733" r="4" />
+    <circle class="window-light" cx="1286" cy="727" r="4" />
+    <circle class="window-light" cx="1272" cy="720" r="4" />
+    <circle class="window-light" cx="898" cy="786" r="4" />
+    <circle class="window-light" cx="901" cy="761" r="4" />
+    <circle class="window-light" cx="934" cy="782" r="4" />
+    <circle class="window-light" cx="462" cy="516" r="6" />
+    <circle class="window-light" cx="445" cy="529" r="6" />
+    <circle class="window-light" cx="428" cy="542" r="6" />
+    <circle class="window-light" cx="615" cy="389" r="6" />
+    <circle class="window-light" cx="732" cy="528" r="6" />
+    <circle class="window-light" cx="1112" cy="363" r="6" />
+    <circle class="window-light" cx="1073" cy="362" r="6" />
+    <circle class="window-light" cx="1088" cy="373" r="6" />
+    <circle class="window-light" cx="1203" cy="525" r="4" />
+    <circle class="window-light" cx="1203" cy="494" r="4" />
+    <circle class="window-light" cx="1235" cy="512" r="4" />
+    <circle class="window-light" cx="1234" cy="545" r="4" />
+    <circle class="window-light" cx="1217" cy="502" r="6" />
+    <circle class="window-light" cx="717" cy="361" r="6" />
+    <circle class="window-light" cx="762" cy="669" r="6" />
+    <circle class="window-light" cx="902" cy="733" r="6" />
+    <circle class="window-light" cx="919" cy="744" r="6" />
+    <circle class="window-light" cx="919" cy="771" r="6" />
+    <circle class="window-light" cx="916" cy="797" r="6" />
+    <circle class="window-light" cx="935" cy="753" r="6" />
+    <circle class="window-light" cx="953" cy="761" r="6" />
+    <circle class="window-light" cx="951" cy="788" r="6" />
+    <circle class="window-light" cx="936" cy="809" r="6" />
+    <circle class="window-light" cx="1185" cy="789" r="6" />
+    <circle class="window-light" cx="1208" cy="792" r="6" />
+    <circle class="window-light" cx="1227" cy="779" r="6" />
+    <circle class="window-light" cx="1166" cy="778" r="6" />
+    <circle class="window-light" cx="1343" cy="662" r="6" />
+    <circle class="window-light" cx="1343" cy="615" r="6" />
+    <circle class="window-light" cx="1343" cy="637" r="6" />
+    <circle class="window-light" cx="1191" cy="627" r="4" />
+    <circle class="window-light" cx="1203" cy="619" r="4" />
+    <circle class="window-light" cx="617" cy="874" r="4" />
+    <circle class="window-light" cx="630" cy="883" r="4" />
+    <circle class="window-light" cx="629" cy="910" r="4" />
+    <circle class="window-light" cx="615" cy="901" r="4" />
+    <circle class="window-light" cx="1019" cy="969" r="4" />
+    <circle class="window-light" cx="1038" cy="959" r="4" />
+    <circle class="window-light" cx="1336" cy="718" r="4" />
+    <circle class="window-light" cx="1323" cy="723" r="4" />
+    <circle class="window-light" cx="758" cy="397" r="6" />
+    <circle class="window-light" cx="789" cy="374" r="6" />
+    <circle class="window-light" cx="786" cy="348" r="6" />
+    <circle class="window-light" cx="821" cy="661" r="6" />
+    <circle class="window-light" cx="803" cy="653" r="6" />
+    <circle class="window-light" cx="787" cy="643" r="6" />
+    <circle class="window-light" cx="767" cy="632" r="6" />
+    <circle class="window-light" cx="557" cy="862" r="6" />
+    <circle class="window-light" cx="542" cy="858" r="6" />
+    <circle class="window-light" cx="854" cy="1069" r="6" />
+    <circle class="window-light" cx="873" cy="1078" r="6" />
+    <circle class="window-light" cx="856" cy="1098" r="6" />
+    <circle class="window-light" cx="872" cy="1108" r="6" />
+    <circle class="window-light" cx="900" cy="1075" r="6" />
+    <circle class="window-light" cx="919" cy="1065" r="4" />
+    <circle class="window-light" cx="902" cy="1108" r="6" />
+    <circle class="window-light" cx="920" cy="1098" r="6" />
+    <circle class="window-light" cx="884" cy="428" r="8" />
+    <circle class="window-light" cx="884" cy="397" r="8" />
+    <circle class="window-light" cx="621" cy="411" r="8" />
+    <circle class="window-light" cx="761" cy="366" r="8" />
+    <circle class="window-light" cx="717" cy="385" r="8" />
+    <circle class="window-light" cx="1249" cy="516" r="8" />
+    <circle class="window-light" cx="1249" cy="550" r="8" />
+    <circle class="window-light" cx="343" cy="658" r="8" />
+    <circle class="window-light" cx="341" cy="689" r="8" />
+    <circle class="window-light" cx="436" cy="722" r="8" />
+    <circle class="window-light" cx="437" cy="750" r="8" />
+    <circle class="window-light" cx="470" cy="639" r="6" />
+    <circle class="window-light" cx="300" cy="664" r="6" />
+    <circle class="window-light" cx="313" cy="671" r="6" />
+    <circle class="window-light" cx="297" cy="704" r="6" />
+    <circle class="window-light" cx="314" cy="709" r="6" />
+    <circle class="window-light" cx="401" cy="786" r="6" />
+    <circle class="window-light" cx="383" cy="708" r="6" />
+    <circle class="window-light" cx="594" cy="843" r="6" />
+    <circle class="window-light" cx="664" cy="907" r="11" />
+    <circle class="window-light" cx="940" cy="409" r="11" />
+    <circle class="window-light" cx="907" cy="409" r="11" />
+    <circle class="window-light" cx="907" cy="441" r="11" />
+    <circle class="window-light" cx="1290" cy="753" r="11" />
+    <circle class="window-light" cx="836" cy="466" r="8" />
+    <circle class="window-light" cx="1153" cy="627" r="6" />
+    <circle class="window-light" cx="1166" cy="633" r="6" />
+    <circle class="window-light" cx="1393" cy="601" r="4" />
+    <circle class="window-light" cx="1394" cy="626" r="4" />
+    <circle class="window-light" cx="997" cy="396" r="6" />
+    <circle class="window-light" cx="1007" cy="421" r="6" />
+    <circle class="window-light" cx="1167" cy="810" r="8" />
+    <circle class="window-light" cx="1208" cy="824" r="6" />
+    <circle class="window-light" cx="1227" cy="811" r="6" />
+    <circle class="window-light" cx="1164" cy="841" r="4" />
+    <circle class="window-light" cx="1359" cy="623" r="4" />
+    <circle class="window-light" cx="817" cy="704" r="6" />
+    <circle class="window-light" cx="1380" cy="635" r="4" />
+    <circle class="window-light" cx="1380" cy="615" r="4" />
+    <circle class="window-light" cx="1110" cy="349" r="4" />
+
+    </svg>
+
+  </div>
+</div>
+
+<script>
+  const viewport = document.querySelector('#viewport');
+  const mapImage = document.querySelector('#map-image');
+  const mapContainer = document.querySelector('#map-container');
+  const svg = document.querySelector('#interaction-svg');
+
+  // composition
+  let composition = [];
+
+  // 1. COORDINATE TRACKER
+  function initMapLayout() {
+    const naturalWidth = mapImage.naturalWidth;
+    const naturalHeight = mapImage.naturalHeight;
+    svg.setAttribute('viewBox', `0 0 ${naturalWidth} ${naturalHeight}`);
+
+    const scrollCenter = (mapContainer.offsetWidth - viewport.clientWidth) / 2;
+    viewport.scrollLeft = scrollCenter;
+    viewport.scrollTop = 0; 
+  }
+
+  if (mapImage.complete) { initMapLayout(); } 
+  else { mapImage.onload = initMapLayout; }
+
+  function playNote(noteIndex) {
+    const audio = new Audio(`sounds/note${noteIndex}.mp3`);
+    audio.volume = 0.4;
+    audio.play().catch(() => { });
+  }
+
+   function activateLights() {
+    const lights = document.querySelectorAll('.window-light');
+    lights.forEach((light) => {
+      const cx = parseFloat(light.getAttribute('cx'));
+      const noteHandle = Math.floor((cx / 1536) * 7) + 1; 
+
+      light.addEventListener('mousedown', (e) => {
+        e.stopPropagation(); 
+        
+        if (!light.classList.contains('lit')) {
+          light.classList.add('lit');
+          playNote(noteHandle); 
+          composition.push({ note: noteHandle, time: Date.now() }); 
+        }
+      });
+    });
+  }
+  activateLights();
+
+  // DRAG-TO-PAN LOGIC
+  let isDown = false;
+  let startX, startY, scrollLeft, scrollTop;
+
+  viewport.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('window-light')) return;
+    isDown = true;
+    viewport.style.cursor = 'grabbing';
+    startX = e.pageX - viewport.offsetLeft;
+    startY = e.pageY - viewport.offsetTop;
+    scrollLeft = viewport.scrollLeft;
+    scrollTop = viewport.scrollTop;
+  });
+
+  viewport.addEventListener('mouseleave', () => isDown = false);
+  viewport.addEventListener('mouseup', () => { isDown = false; viewport.style.cursor = 'grab'; });
+
+  viewport.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - viewport.offsetLeft;
+    const y = e.pageY - viewport.offsetTop;
+    viewport.scrollLeft = scrollLeft - (x - startX) * 1.5;
+    viewport.scrollTop = scrollTop - (y - startY) * 1.5;
+  });
+
+  // 3. STACKABLE AUDIO LOGIC
+  // Replace 'hum.mp3' with your actual sound file paths
+      
+      // Smooth Fade In
+      
+
+    window.addEventListener('resize', () => {
+      const scrollCenter = (mapContainer.offsetWidth - viewport.clientWidth) / 2;
+      viewport.scrollLeft = scrollCenter;
+    });
+
+</script>
+
+</body>
+</html>
